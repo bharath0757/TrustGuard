@@ -18,7 +18,12 @@ Security notes
 """
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from database.models.paper import QuestionPaper
+    from database.models.access import AccessRequest, Approval
+    from database.models.audit import AuditLog, ThreatEvent
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship

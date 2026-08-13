@@ -22,7 +22,12 @@ Security notes
 import enum
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from database.models.user import User
+    from database.models.fragment import PaperFragment
+    from database.models.access import AccessRequest, AccessWindow
 
 from sqlalchemy import Enum, ForeignKey, Index, Integer, String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship

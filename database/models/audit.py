@@ -29,7 +29,10 @@ efficient GIN indexing.
 import enum
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from database.models.user import User
 
 from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Index, JSON, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship

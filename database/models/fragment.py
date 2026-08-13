@@ -18,7 +18,10 @@ Security notes
 """
 import enum
 import uuid
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from database.models.paper import QuestionPaper
 
 from sqlalchemy import Enum, ForeignKey, Index, LargeBinary, SmallInteger, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
