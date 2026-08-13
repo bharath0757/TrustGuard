@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "trustguard"
+version = "0.1.0"
+description = "Zero-Trust cybersecurity prototype for protecting examination question papers"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi==0.111.0",
+    "uvicorn[standard]==0.29.0",
+    "python-dotenv==1.0.1",
+    "sqlalchemy==2.0.30",
+    "alembic==1.13.1",
+    "psycopg2-binary==2.9.9",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest==8.2.2",
+    "pytest-asyncio==0.23.7",
+]
+
+[tool.setuptools.packages.find]
+# Auto-discover all packages in the repo root
+where = ["."]
+include = ["database*", "backend*", "security*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
