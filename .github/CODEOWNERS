@@ -1,0 +1,7 @@
+/frontend/ @FRONTEND_USERNAME
+/backend/ @BACKEND_USERNAME
+/security/ @SECURITY_USERNAME
+/database/ @SECURITY_USERNAME
+/attack-simulator/ @TESTING_USERNAME
+/tests/ @TESTING_USERNAME
+/docs/ @TEAM_LEAD_USERNAME

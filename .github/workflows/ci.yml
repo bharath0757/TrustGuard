@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+      - name: Verify frontend folder exists
+        run: ls -la frontend
+      - name: Verify basic structure
+        run: |
+          test -d backend
+          test -d frontend
+          test -d security
+          test -d database
+          test -d attack-simulator
+          test -d tests
