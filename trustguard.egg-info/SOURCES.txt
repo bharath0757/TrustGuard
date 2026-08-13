@@ -3,6 +3,7 @@ pyproject.toml
 backend/main.py
 database/__init__.py
 database/base.py
+database/seed.py
 database/session.py
 database/migrations/env.py
 database/migrations/versions/0001_initial_schema.py
@@ -12,6 +13,10 @@ database/models/audit.py
 database/models/fragment.py
 database/models/paper.py
 database/models/user.py
+security/crypto/__init__.py
+security/crypto/encryption.py
+security/crypto/integrity.py
+security/crypto/key_manager.py
 trustguard.egg-info/PKG-INFO
 trustguard.egg-info/SOURCES.txt
 trustguard.egg-info/dependency_links.txt
