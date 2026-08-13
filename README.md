@@ -1,60 +1,59 @@
-# TrustGuard
+# TrustGuard Backend
 
-TrustGuard is a Zero-Trust cybersecurity prototype designed for protecting high-stakes examination question papers.
+This is the backend service for TrustGuard, a Zero-Trust cybersecurity prototype for protecting high-stakes examination question papers.
 
-## Project Objective
-The goal is to implement a secure lifecycle for question papers that enforces Zero-Trust principles, including multi-party authorization, cryptographic fragmentation, and just-in-time access, while maintaining a tamper-proof audit trail.
+## Project Structure
 
-## High-Level Architecture
-- **React Frontend**: User dashboards and interfaces
-- **FastAPI Backend**: Orchestration, API, and access control
-- **Security & Cryptography**: Encryption and quorum logic
-- **Database / Audit**: PostgreSQL storage for fragments and immutable logs
-- **Attack Simulator**: Controlled testing of security defenses
+* `database/`: PostgreSQL database schema, SQLAlchemy ORM models, Alembic migrations, and seed scripts.
+* `security/`: Cryptographic layer for encrypting, decrypting, and fragmenting exam papers. (TODO)
+* `backend/`: FastAPI application providing the REST API. (TODO)
 
-## Repository Structure
-- `/frontend/` - React/Vite/Tailwind UI
-- `/backend/` - FastAPI backend
-- `/security/` - Cryptography and Zero-Trust logic
-- `/database/` - PostgreSQL schemas and migrations
-- `/attack-simulator/` - Simulated threats
-- `/tests/` - Integration and E2E tests
-- `/docs/` - Architecture, API specs, and development guides
+## Database Setup
 
-## Team Ownership
-- `/frontend/` → @FRONTEND_USERNAME
-- `/backend/` → @BACKEND_USERNAME
-- `/security/` → @SECURITY_USERNAME
-- `/database/` → @SECURITY_USERNAME
-- `/attack-simulator/` → @TESTING_USERNAME
-- `/tests/` → @TESTING_USERNAME
-- `/docs/` → @TEAM_LEAD_USERNAME
+The database requires PostgreSQL 15+. 
 
-## Getting Started
+### 1. Environment Variables
 
-### Prerequisites
-- Docker and Docker Compose
-- Git
-- Python 3.10+
-- Node.js 18+
+Copy the `.env.example` file to `.env`:
 
-### Clone the Repository
 ```bash
-git clone https://github.com/bharath0757/TrustGuard.git
-cd TrustGuard
+cp .env.example .env
 ```
 
-### Running Locally
-We use Docker Compose to simplify local development.
-1. Copy the example environment file: `cp .env.example .env`
-2. Run the services: `docker-compose up --build`
+Ensure the `DATABASE_URL` matches your local setup. If you use Docker, the default values will work out of the box.
 
-### Git Workflow & Rules
-- **No Direct Pushes**: Nobody directly pushes to `main`.
-- **Feature Branches**: Developers work on feature branches (e.g., `feature/frontend`).
-- **Pull Requests**: Pull requests are required to merge into `develop` or `main`.
-- **Reviews**: Security and database changes require explicit review.
-- **Testing**: All tests must pass before merging.
-- **Security**: NEVER commit secrets or actual `.env` files.
+### 2. Start PostgreSQL
 
-For full developer instructions, please see [Development Guide](docs/DEVELOPMENT_GUIDE.md).
+Use Docker Compose to spin up the PostgreSQL database:
+
+```bash
+docker-compose up -d postgres
+```
+
+### 3. Run Migrations
+
+To create the tables in your empty database, run the Alembic migrations:
+
+```bash
+alembic upgrade head
+```
+
+### 4. Seed Development Data
+
+To populate the database with safe development data (users, roles, sample papers, etc.), run the seed script:
+
+```bash
+python -m database.seed
+```
+
+**Security Note:** The seed script uses fake password hashes and random byte sequences for fragment data. It does not contain any real credentials or actual examination content.
+
+## Testing
+
+The database models are fully covered by tests that run against an in-memory SQLite database, meaning you can run tests without a running PostgreSQL instance.
+
+Run the tests using pytest:
+
+```bash
+pytest tests/database/ -v
+```

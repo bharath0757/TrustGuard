@@ -15,20 +15,31 @@ services:
     working_dir: /app
     volumes:
       - ./backend:/app
+      - ./database:/app/database
     ports:
       - "8000:8000"
+    environment:
+      DATABASE_URL: "postgresql://trustguard_user:${POSTGRES_PASSWORD:-changeme_dev_only}@postgres:5432/trustguard"
+      APP_ENV: development
+    depends_on:
+      - postgres
     command: sh -c "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: trustguard_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_dev_only}
       POSTGRES_DB: trustguard
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trustguard_user -d trustguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:

@@ -3,9 +3,16 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.env
+*.egg-info/
+*.egg
 venv/
 env/
+.venv/
+
+# Environment — NEVER commit credentials
+.env
+.env.local
+.env.*.local
 
 # Node
 node_modules/
@@ -15,3 +22,14 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing / caching
+.pytest_cache/
+.coverage
+htmlcov/
