@@ -1,60 +1,103 @@
 # TrustGuard
 
-TrustGuard is a Zero-Trust cybersecurity prototype designed for protecting high-stakes examination question papers.
+**TrustGuard** is a Zero-Trust cybersecurity prototype designed to protect high-stakes examination question papers from unauthorized access, premature leakage, and single-point-of-compromise vulnerabilities.
 
-## Project Objective
-The goal is to implement a secure lifecycle for question papers that enforces Zero-Trust principles, including multi-party authorization, cryptographic fragmentation, and just-in-time access, while maintaining a tamper-proof audit trail.
+---
 
-## High-Level Architecture
-- **React Frontend**: User dashboards and interfaces
-- **FastAPI Backend**: Orchestration, API, and access control
-- **Security & Cryptography**: Encryption and quorum logic
-- **Database / Audit**: PostgreSQL storage for fragments and immutable logs
-- **Attack Simulator**: Controlled testing of security defenses
+## Architecture Overview
 
-## Repository Structure
-- `/frontend/` - React/Vite/Tailwind UI
-- `/backend/` - FastAPI backend
-- `/security/` - Cryptography and Zero-Trust logic
-- `/database/` - PostgreSQL schemas and migrations
-- `/attack-simulator/` - Simulated threats
-- `/tests/` - Integration and E2E tests
-- `/docs/` - Architecture, API specs, and development guides
+* `frontend/`: React 19 + Vite dashboard with multi-party approval controls, threat alerts, audit trail, and attack simulator.
+* `backend/`: FastAPI REST API service with JWT authentication, role-based access control, ephemeral distribution, and health monitoring.
+* `security/`: Cryptographic engine implementing AES-256-GCM authenticated encryption, SHA-256 sharding, k-of-n quorum consensus, 6-factor JIT access validation, and memory-safe buffers.
+* `database/`: PostgreSQL / SQLite SQLAlchemy ORM models, Alembic migrations, and seed scripts.
+* `attack-simulator/`: Controlled cyberattack simulation module.
+* `scripts/`: Diagnostic and verification utilities (`scripts/verify_setup.py`).
+* `tests/`: Comprehensive unit, integration, and security failure test suites (130+ tests).
 
-## Team Ownership
-- `/frontend/` → @FRONTEND_USERNAME
-- `/backend/` → @BACKEND_USERNAME
-- `/security/` → @SECURITY_USERNAME
-- `/database/` → @SECURITY_USERNAME
-- `/attack-simulator/` → @TESTING_USERNAME
-- `/tests/` → @TESTING_USERNAME
-- `/docs/` → @TEAM_LEAD_USERNAME
+---
 
-## Getting Started
+## Quick Start (Docker Compose)
 
-### Prerequisites
-- Docker and Docker Compose
-- Git
-- Python 3.10+
-- Node.js 18+
+The easiest way to run the complete TrustGuard stack:
 
-### Clone the Repository
 ```bash
-git clone https://github.com/bharath0757/TrustGuard.git
-cd TrustGuard
+# 1. Clone the repository and configure environment
+cp .env.example .env
+
+# 2. Build and launch all services (PostgreSQL, Backend API, Frontend Dashboard)
+docker-compose up --build
 ```
 
-### Running Locally
-We use Docker Compose to simplify local development.
-1. Copy the example environment file: `cp .env.example .env`
-2. Run the services: `docker-compose up --build`
+Services will be accessible at:
+* **Frontend Dashboard**: `http://localhost:5173`
+* **Backend REST API**: `http://localhost:8000`
+* **API Interactive Docs**: `http://localhost:8000/docs`
+* **Health Endpoint**: `http://localhost:8000/health`
+* **PostgreSQL Database**: `localhost:5432`
 
-### Git Workflow & Rules
-- **No Direct Pushes**: Nobody directly pushes to `main`.
-- **Feature Branches**: Developers work on feature branches (e.g., `feature/frontend`).
-- **Pull Requests**: Pull requests are required to merge into `develop` or `main`.
-- **Reviews**: Security and database changes require explicit review.
-- **Testing**: All tests must pass before merging.
-- **Security**: NEVER commit secrets or actual `.env` files.
+---
 
-For full developer instructions, please see [Development Guide](docs/DEVELOPMENT_GUIDE.md).
+## Local Bare-Metal Development Setup
+
+### 1. Prerequisites
+* Python 3.9+ with `pip`
+* Node.js 18+ with `npm`
+* PostgreSQL 15+ (or automatic local SQLite fallback for standalone testing)
+* Redis (optional; automatically falls back to in-memory TTL store)
+
+### 2. Environment Configuration
+```bash
+cp .env.example .env
+```
+
+Generate a secure 32-byte master key for development:
+```bash
+python -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+```
+Paste this value into `.env` under `TRUSTGUARD_MASTER_KEY`.
+
+### 3. Install Python Dependencies
+```bash
+pip install -e .
+pip install -r backend/requirements.txt
+```
+
+### 4. Database Setup & Migrations
+```bash
+# Apply migrations (PostgreSQL)
+alembic upgrade head
+
+# Seed development data
+python -m database.seed
+```
+
+### 5. Start Backend Service
+```bash
+cd backend
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 6. Start Frontend Dashboard
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## Verification & Health Checks
+
+Verify your end-to-end setup and dependencies in one step:
+```bash
+python scripts/verify_setup.py
+```
+
+Run the automated test suites:
+```bash
+# Run security & database test suite
+pytest tests
+
+# Run backend API test suite
+pytest backend/tests
+```

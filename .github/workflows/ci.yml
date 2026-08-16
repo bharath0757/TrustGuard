@@ -1,31 +1,118 @@
-name: CI
+name: TrustGuard CI Pipeline
 
 on:
   push:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - master
+      - develop
+      - 'feature/**'
   pull_request:
-    branches: [ main, develop ]
+    branches:
+      - main
+      - master
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  # =========================================================================
+  # 1. BACKEND & SECURITY TESTS
+  # =========================================================================
+  backend-and-security:
+    name: Backend, Security, Database & Integration Tests
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres_ci_test_password
+          POSTGRES_DB: trustguard_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres_ci_test_password@localhost:5432/trustguard_test
+      POSTGRES_DB_URL: postgresql://postgres:postgres_ci_test_password@localhost:5432/trustguard_test
+      SECRET_KEY: ci_isolated_test_secret_key_32_bytes_min_length!
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      CORS_ORIGINS: "http://localhost:3000,http://localhost:5173"
+      LOG_LEVEL: INFO
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      - name: Install backend dependencies
+          cache: 'pip'
+
+      - name: Install Python dependencies
         run: |
-          cd backend
-          pip install -r requirements.txt
-      - name: Verify frontend folder exists
-        run: ls -la frontend
-      - name: Verify basic structure
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r backend/requirements.txt
+          pip install -e .
+
+      - name: Run Database Tests
         run: |
-          test -d backend
-          test -d frontend
-          test -d security
-          test -d database
-          test -d attack-simulator
-          test -d tests
+          pytest -v tests/database/
+
+      - name: Run Cryptography & Security Tests
+        run: |
+          pytest -v tests/security/
+
+      - name: Run API & Full System Integration Tests
+        run: |
+          pytest -v tests/integration/
+
+      - name: Run Complete TrustGuard Regression Suite
+        run: |
+          pytest -v tests/regression/
+
+      - name: Run Full Test Suite Validation
+        run: |
+          pytest -v
+
+  # =========================================================================
+  # 2. FRONTEND BUILD & LINT CHECKS
+  # =========================================================================
+  frontend-build:
+    name: Frontend Build & Code Quality
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package.json
+
+      - name: Install Frontend Dependencies
+        run: npm install
+
+      - name: Run Frontend Lint Checks
+        run: npm run lint
+
+      - name: Build Frontend Application
+        run: npm run build
