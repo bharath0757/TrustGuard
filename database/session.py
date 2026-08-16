@@ -22,7 +22,7 @@ refuses to start if the variable is missing.
 """
 import os
 import sys
-from typing import Generator
+from typing import Generator, Optional
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -31,7 +31,7 @@ from sqlalchemy.orm import Session, sessionmaker
 # Engine
 # ---------------------------------------------------------------------------
 
-DATABASE_URL: str | None = os.environ.get("DATABASE_URL")
+DATABASE_URL: Optional[str] = os.environ.get("DATABASE_URL")
 
 if DATABASE_URL is None:
     # Allow import-time usage without a live database (e.g., pytest
@@ -42,18 +42,18 @@ if DATABASE_URL is None:
 else:
     _PLACEHOLDER = False
 
-engine = create_engine(
-    DATABASE_URL,
-    # Recycle stale connections silently rather than raising on first use.
-    pool_pre_ping=True,
-    # Conservative pool — tune for production workload.
-    pool_size=5 if "sqlite" not in DATABASE_URL else 1,
-    max_overflow=10 if "sqlite" not in DATABASE_URL else 0,
-    # Enable SQL logging only when explicitly requested (never in production).
-    echo=os.environ.get("SQL_ECHO", "false").lower() == "true",
-    # SQLite needs this for FK enforcement and thread-safety.
-    **({"connect_args": {"check_same_thread": False}} if "sqlite" in DATABASE_URL else {}),
-)
+engine_kwargs = {
+    "echo": os.environ.get("SQL_ECHO", "false").lower() == "true",
+}
+
+if "sqlite" in DATABASE_URL:
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    engine_kwargs["pool_pre_ping"] = True
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 10
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 
 # ---------------------------------------------------------------------------
 # Session factory
