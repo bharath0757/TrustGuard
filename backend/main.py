@@ -1,11 +1,15 @@
 """TrustGuard Backend Main Entrypoint."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from datetime import datetime, timezone
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.router import api_router
 from app.core.config import settings
-from app.db.database import init_db
+from app.db.database import get_db, init_db
+from app.db.ephemeral import get_ephemeral_store
 
 
 @asynccontextmanager
@@ -42,8 +46,28 @@ def read_root():
 
 
 @app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+@app.get("/api/v1/health")
+async def health_check(db: AsyncSession = Depends(get_db)):
+    """System health check endpoint verifying Backend, Database, and Ephemeral RAM."""
+    db_status = "connected"
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "unavailable"
+
+    ephemeral = get_ephemeral_store()
+    ephemeral_mode = "memory_fallback" if ephemeral._use_fallback else "ready"
+
+    is_healthy = db_status == "connected"
+
+    return {
+        "status": "healthy" if is_healthy else "degraded",
+        "service": "TrustGuard Backend API",
+        "version": settings.VERSION,
+        "database": db_status,
+        "ephemeral_store": ephemeral_mode,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
 
 
 if __name__ == "__main__":

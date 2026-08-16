@@ -42,18 +42,30 @@ if DATABASE_URL is None:
 else:
     _PLACEHOLDER = False
 
+def _normalize_sync_url(url: Optional[str]) -> str:
+    if not url:
+        return "sqlite://"
+    if url.startswith("postgresql+asyncpg://"):
+        return url.replace("postgresql+asyncpg://", "postgresql://", 1)
+    if url.startswith("sqlite+aiosqlite://"):
+        return url.replace("sqlite+aiosqlite://", "sqlite://", 1)
+    return url
+
+
+_effective_url = _normalize_sync_url(DATABASE_URL)
+
 engine_kwargs = {
     "echo": os.environ.get("SQL_ECHO", "false").lower() == "true",
 }
 
-if "sqlite" in DATABASE_URL:
+if "sqlite" in _effective_url:
     engine_kwargs["connect_args"] = {"check_same_thread": False}
 else:
     engine_kwargs["pool_pre_ping"] = True
     engine_kwargs["pool_size"] = 5
     engine_kwargs["max_overflow"] = 10
 
-engine = create_engine(DATABASE_URL, **engine_kwargs)
+engine = create_engine(_effective_url, **engine_kwargs)
 
 # ---------------------------------------------------------------------------
 # Session factory

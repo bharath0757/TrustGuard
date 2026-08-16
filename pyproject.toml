@@ -26,8 +26,8 @@ test = [
 [tool.setuptools.packages.find]
 # Auto-discover all packages in the repo root
 where = ["."]
-include = ["database*", "backend*", "security*"]
+include = ["database*", "backend*", "security*", "attack_simulator*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = "-v --tb=short"
+testpaths = ["tests", "backend/tests"]
+addopts = "-v --tb=short --import-mode=importlib"

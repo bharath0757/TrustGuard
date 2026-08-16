@@ -194,9 +194,17 @@ export function TrustGuardProvider({ children }) {
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
 
-  // DEMO FLOW 2 — SIMULATE UNAUTHORIZED ACCESS
-  const triggerAttackSimulation = ({ scenarioName, paperId }) => {
-    const targetPaper = paperId || 'JEE-MOCK-001';
+  // DEMO FLOW 2 — SIMULATE CONTROLLED ATTACK SCENARIO
+  const triggerAttackSimulation = (simData = {}) => {
+    const scenarioName = simData.scenario_name || simData.scenarioName || 'Unauthorized question-paper access';
+    const targetPaper = simData.target_paper || simData.paperId || 'JEE-MOCK-001';
+    const actualDecision = simData.actual_decision || 'BLOCKED';
+    const statusCategory = simData.status_category || actualDecision;
+    const riskSeverity = simData.risk_severity || 'Critical';
+    const actor = simData.simulated_actor || 'Unknown External Terminal';
+    const auditEventId = simData.audit_event_id || `EVT-${Date.now().toString().slice(-4)}`;
+    const reason = simData.details?.reason || 'Required authorization conditions were not satisfied.';
+
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const fullTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
@@ -204,36 +212,35 @@ export function TrustGuardProvider({ children }) {
 
     const newAlert = {
       id: `ALT-${Date.now().toString().slice(-4)}`,
-      severity: 'Critical',
-      title: 'Unauthorized question-paper access attempt',
+      severity: riskSeverity === 'CRITICAL' ? 'Critical' : riskSeverity === 'HIGH' ? 'High' : 'Medium',
+      title: `${scenarioName} attempt`,
       paper: targetPaper,
-      action: 'Reconstruct protected paper',
-      result: 'Access blocked',
+      action: 'Protected Paper Operation',
+      result: actualDecision,
       time: currentTime,
       status: 'Active',
-      authorization: 'Failed',
-      decision: 'ACCESS BLOCKED',
+      authorization: actualDecision === 'ALLOWED' ? 'Passed' : 'Failed',
+      decision: actualDecision,
       decisionStatus: 'Recorded',
-      reason: 'Required authorization was not satisfied.',
+      reason: reason,
       timeline: [
-        { time: `${currentTime}:01`, text: 'Access request received' },
-        { time: `${currentTime}:01`, text: 'Authorization checked' },
-        { time: `${currentTime}:02`, text: 'Required approval not satisfied' },
-        { time: `${currentTime}:02`, text: 'Access blocked' },
-        { time: `${currentTime}:03`, text: 'Security event recorded' },
+        { time: `${currentTime}:01`, text: `Simulation request received (${actor})` },
+        { time: `${currentTime}:01`, text: 'Zero-Trust security rules evaluated by backend engine' },
+        { time: `${currentTime}:02`, text: `Security policy evaluated -> ${actualDecision}` },
+        { time: `${currentTime}:03`, text: `AuditEvent ${auditEventId} committed to database` },
       ],
     };
 
     const newAuditEvent = {
-      id: `EVT-${Date.now().toString().slice(-4)}`,
+      id: auditEventId,
       time: fullTime,
       type: 'Security',
-      actor: 'Unknown User',
+      actor: actor,
       paper: targetPaper,
-      action: 'Unauthorized paper access request blocked',
-      result: 'Blocked',
-      description: 'The request did not satisfy the required authorization conditions.',
-      requestedAction: 'Requested protected paper access',
+      action: `${scenarioName} (${actualDecision})`,
+      result: actualDecision === 'ALLOWED' ? 'Success' : 'Blocked',
+      description: reason,
+      requestedAction: `Simulated attack: ${scenarioName}`,
     };
 
     setThreatAlerts((prev) => [newAlert, ...prev]);

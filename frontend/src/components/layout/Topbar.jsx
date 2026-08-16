@@ -2,6 +2,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Menu, User, ShieldCheck, RotateCcw } from 'lucide-react';
 import { useTrustGuard } from '../../hooks/useTrustGuard';
+import { useSystemHealth } from '../../hooks/useSystemHealth';
 import { Button } from '../ui';
 
 const ROUTE_NAMES = {
@@ -18,6 +19,7 @@ const ROUTE_NAMES = {
 export function Topbar() {
   const location = useLocation();
   const { toggleSidebar, resetDemoState } = useTrustGuard();
+  const { isBackendConnected, status: healthStatus, database: dbStatus } = useSystemHealth();
 
   const currentRouteName = ROUTE_NAMES[location.pathname] || 'Dashboard';
 
@@ -44,11 +46,28 @@ export function Topbar() {
 
       {/* Right: System Status, Reset Demo & User Profile */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* System Status: Secure */}
-        <div className="hidden sm:flex items-center gap-2 bg-[#ECFDF3] border border-[#D1FADF] px-3 py-1.5 rounded-md text-xs">
-          <span className="w-2 h-2 rounded-full bg-[#2E7D5B] shrink-0" />
-          <span className="font-semibold text-[#2E7D5B]">System status: Secure</span>
-        </div>
+        {/* Dynamic System & Connectivity Status */}
+        {isBackendConnected ? (
+          <div
+            title={`Backend: Online | DB: ${dbStatus}`}
+            className="hidden sm:flex items-center gap-2 bg-[#ECFDF3] border border-[#D1FADF] px-3 py-1.5 rounded-md text-xs cursor-help"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#2E7D5B] shrink-0 animate-pulse" />
+            <span className="font-semibold text-[#2E7D5B]">
+              System status: Secure {dbStatus === 'connected' ? '(API Connected)' : '(DB Degraded)'}
+            </span>
+          </div>
+        ) : (
+          <div
+            title="Backend API not detected; running in standalone local demo mode."
+            className="hidden sm:flex items-center gap-2 bg-[#F0F4F8] border border-[#C7D0DA] px-3 py-1.5 rounded-md text-xs cursor-help"
+          >
+            <span className="w-2 h-2 rounded-full bg-[#5E6B78] shrink-0" />
+            <span className="font-semibold text-[#5E6B78]">
+              System status: Demo Mode (Standalone)
+            </span>
+          </div>
+        )}
 
         {/* Quick Reset Demo Action */}
         <button

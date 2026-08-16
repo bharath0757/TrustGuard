@@ -16,13 +16,16 @@ services:
     volumes:
       - ./backend:/app
       - ./database:/app/database
+      - ./security:/app/security
     ports:
       - "8000:8000"
     environment:
       DATABASE_URL: "postgresql://trustguard_user:${POSTGRES_PASSWORD:-changeme_dev_only}@postgres:5432/trustguard"
       APP_ENV: development
+      PYTHONPATH: /app
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     command: sh -c "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   postgres:

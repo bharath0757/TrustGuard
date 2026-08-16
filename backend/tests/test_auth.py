@@ -12,7 +12,8 @@ async def test_root_and_health(async_client: AsyncClient):
 
     res_health = await async_client.get("/health")
     assert res_health.status_code == 200
-    assert res_health.json() == {"status": "healthy"}
+    assert res_health.json()["status"] == "healthy"
+    assert res_health.json()["database"] == "connected"
 
 
 @pytest.mark.asyncio

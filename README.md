@@ -1,59 +1,103 @@
-# TrustGuard Backend
+# TrustGuard
 
-This is the backend service for TrustGuard, a Zero-Trust cybersecurity prototype for protecting high-stakes examination question papers.
+**TrustGuard** is a Zero-Trust cybersecurity prototype designed to protect high-stakes examination question papers from unauthorized access, premature leakage, and single-point-of-compromise vulnerabilities.
 
-## Project Structure
+---
 
-* `database/`: PostgreSQL database schema, SQLAlchemy ORM models, Alembic migrations, and seed scripts.
-* `security/`: Cryptographic layer for encrypting, decrypting, and fragmenting exam papers. (TODO)
-* `backend/`: FastAPI application providing the REST API. (TODO)
+## Architecture Overview
 
-## Database Setup
+* `frontend/`: React 19 + Vite dashboard with multi-party approval controls, threat alerts, audit trail, and attack simulator.
+* `backend/`: FastAPI REST API service with JWT authentication, role-based access control, ephemeral distribution, and health monitoring.
+* `security/`: Cryptographic engine implementing AES-256-GCM authenticated encryption, SHA-256 sharding, k-of-n quorum consensus, 6-factor JIT access validation, and memory-safe buffers.
+* `database/`: PostgreSQL / SQLite SQLAlchemy ORM models, Alembic migrations, and seed scripts.
+* `attack-simulator/`: Controlled cyberattack simulation module.
+* `scripts/`: Diagnostic and verification utilities (`scripts/verify_setup.py`).
+* `tests/`: Comprehensive unit, integration, and security failure test suites (130+ tests).
 
-The database requires PostgreSQL 15+. 
+---
 
-### 1. Environment Variables
+## Quick Start (Docker Compose)
 
-Copy the `.env.example` file to `.env`:
+The easiest way to run the complete TrustGuard stack:
 
+```bash
+# 1. Clone the repository and configure environment
+cp .env.example .env
+
+# 2. Build and launch all services (PostgreSQL, Backend API, Frontend Dashboard)
+docker-compose up --build
+```
+
+Services will be accessible at:
+* **Frontend Dashboard**: `http://localhost:5173`
+* **Backend REST API**: `http://localhost:8000`
+* **API Interactive Docs**: `http://localhost:8000/docs`
+* **Health Endpoint**: `http://localhost:8000/health`
+* **PostgreSQL Database**: `localhost:5432`
+
+---
+
+## Local Bare-Metal Development Setup
+
+### 1. Prerequisites
+* Python 3.9+ with `pip`
+* Node.js 18+ with `npm`
+* PostgreSQL 15+ (or automatic local SQLite fallback for standalone testing)
+* Redis (optional; automatically falls back to in-memory TTL store)
+
+### 2. Environment Configuration
 ```bash
 cp .env.example .env
 ```
 
-Ensure the `DATABASE_URL` matches your local setup. If you use Docker, the default values will work out of the box.
-
-### 2. Start PostgreSQL
-
-Use Docker Compose to spin up the PostgreSQL database:
-
+Generate a secure 32-byte master key for development:
 ```bash
-docker-compose up -d postgres
+python -c "import secrets, base64; print(base64.b64encode(secrets.token_bytes(32)).decode())"
+```
+Paste this value into `.env` under `TRUSTGUARD_MASTER_KEY`.
+
+### 3. Install Python Dependencies
+```bash
+pip install -e .
+pip install -r backend/requirements.txt
 ```
 
-### 3. Run Migrations
-
-To create the tables in your empty database, run the Alembic migrations:
-
+### 4. Database Setup & Migrations
 ```bash
+# Apply migrations (PostgreSQL)
 alembic upgrade head
-```
 
-### 4. Seed Development Data
-
-To populate the database with safe development data (users, roles, sample papers, etc.), run the seed script:
-
-```bash
+# Seed development data
 python -m database.seed
 ```
 
-**Security Note:** The seed script uses fake password hashes and random byte sequences for fragment data. It does not contain any real credentials or actual examination content.
-
-## Testing
-
-The database models are fully covered by tests that run against an in-memory SQLite database, meaning you can run tests without a running PostgreSQL instance.
-
-Run the tests using pytest:
-
+### 5. Start Backend Service
 ```bash
-pytest tests/database/ -v
+cd backend
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### 6. Start Frontend Dashboard
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## Verification & Health Checks
+
+Verify your end-to-end setup and dependencies in one step:
+```bash
+python scripts/verify_setup.py
+```
+
+Run the automated test suites:
+```bash
+# Run security & database test suite
+pytest tests
+
+# Run backend API test suite
+pytest backend/tests
 ```
