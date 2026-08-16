@@ -40,22 +40,22 @@ export function Modal({
       {/* Modal Dialog */}
       <div
         className={cn(
-          'relative w-full rounded-xl border border-[#C7D0DA] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl z-10 overflow-hidden text-[#1F2933] dark:text-slate-100 max-h-[92vh] flex flex-col',
+          'relative w-full rounded-xl border border-[#C7D0DA] bg-white shadow-xl z-10 overflow-hidden text-[#182230] max-h-[92vh] flex flex-col',
           maxWidth,
           className
         )}
       >
         {/* Header */}
-        <div className="flex items-start justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#D5DDE5] dark:border-slate-800 bg-[#F1F4F7] dark:bg-slate-900/70 shrink-0">
+        <div className="flex items-start justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#D5DDE5] bg-[#F1F4F7] shrink-0">
           <div className="min-w-0 pr-2">
-            {title && <h3 className="text-sm sm:text-base font-bold text-[#17324D] dark:text-slate-100 truncate">{title}</h3>}
-            {subtitle && <p className="text-xs text-[#667085] dark:text-slate-400 mt-0.5 truncate">{subtitle}</p>}
+            {title && <h3 className="text-sm sm:text-base font-bold text-[#17324D] truncate">{title}</h3>}
+            {subtitle && <p className="text-xs text-[#667085] mt-0.5 truncate">{subtitle}</p>}
           </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="text-[#667085] hover:text-[#1F2933] dark:text-slate-400 dark:hover:text-slate-100 -mr-1.5 -mt-1 shrink-0 p-1"
+            className="text-[#667085] hover:text-[#182230] -mr-1.5 -mt-1 shrink-0 p-1"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
@@ -67,7 +67,7 @@ export function Modal({
 
         {/* Footer (Optional) */}
         {footer && (
-          <div className="px-4 sm:px-6 py-3 border-t border-[#D5DDE5] dark:border-slate-800 bg-[#F1F4F7] dark:bg-slate-900/70 flex items-center justify-end gap-3 shrink-0">
+          <div className="px-4 sm:px-6 py-3 border-t border-[#D5DDE5] bg-[#F1F4F7] flex items-center justify-end gap-3 shrink-0">
             {footer}
           </div>
         )}
@@ -75,3 +75,4 @@ export function Modal({
     </div>
   );
 }
+

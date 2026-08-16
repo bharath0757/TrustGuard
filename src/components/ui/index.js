@@ -4,3 +4,5 @@ export { Badge } from './Badge';
 export { Input } from './Input';
 export { Modal } from './Modal';
 export { StatusIndicator } from './StatusIndicator';
+export { AmbientBubbles } from './AmbientBubbles';
+

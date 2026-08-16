@@ -150,18 +150,18 @@ export function ExamCenterPage() {
       >
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           {/* Step 1: Protected */}
-          <div className="p-2.5 rounded-lg bg-[#F1F4F7] border border-[#D5DDE5] flex items-center justify-between">
-            <span className="font-semibold text-[#1F2933]">Protected</span>
+          <div className="p-2.5 rounded-lg bg-[#EAF5F0] border border-[#B2D8C7] flex items-center justify-between transition-all">
+            <span className="font-semibold text-[#182230]">Protected</span>
             <div className="flex items-center gap-1 text-[#2E7D5B] font-bold text-xs">
               <Check className="w-3.5 h-3.5" />
             </div>
           </div>
 
           {/* Step 2: Authorized */}
-          <div className={`p-2.5 rounded-lg border flex items-center justify-between ${
-            isQuorumAchieved ? 'bg-[#F1F4F7] border-[#D5DDE5]' : 'bg-[#FFFAEB] border-[#FEDF89]'
+          <div className={`p-2.5 rounded-lg border flex items-center justify-between transition-all duration-300 ${
+            isQuorumAchieved ? 'bg-[#EAF5F0] border-[#B2D8C7]' : 'bg-[#FAF3E7] border-[#E8D4B5]'
           }`}>
-            <span className="font-semibold text-[#1F2933]">Authorized</span>
+            <span className="font-semibold text-[#182230]">Authorized</span>
             {isQuorumAchieved ? (
               <div className="flex items-center gap-1 text-[#2E7D5B] font-bold text-xs">
                 <Check className="w-3.5 h-3.5" />
@@ -172,10 +172,10 @@ export function ExamCenterPage() {
           </div>
 
           {/* Step 3: Access Active */}
-          <div className={`p-2.5 rounded-lg border flex items-center justify-between ${
+          <div className={`p-2.5 rounded-lg border flex items-center justify-between transition-all duration-300 ${
             sessionState === 'active' 
-              ? 'bg-[#ECFDF3] border-[#D1FADF] text-[#2E7D5B]' 
-              : 'bg-[#F1F4F7] border-[#D5DDE5] text-[#667085]'
+              ? 'bg-[#EAF5F0] border-[#B2D8C7] text-[#2E7D5B]' 
+              : 'bg-[#F0F4F8] border-[#C7D0DA] text-[#5E6B78]'
           }`}>
             <span className="font-semibold">Access Active</span>
             <span className="text-xs font-mono font-bold">
@@ -184,10 +184,10 @@ export function ExamCenterPage() {
           </div>
 
           {/* Step 4: Session Closed */}
-          <div className={`p-2.5 rounded-lg border flex items-center justify-between ${
+          <div className={`p-2.5 rounded-lg border flex items-center justify-between transition-all duration-300 ${
             sessionState === 'closed' 
-              ? 'bg-[#F1F4F7] border-[#D5DDE5] text-[#344054]' 
-              : 'bg-[#F1F4F7] border-[#D5DDE5] text-[#667085]'
+              ? 'bg-[#F0F4F8] border-[#C7D0DA] text-[#182230]' 
+              : 'bg-[#F0F4F8] border-[#C7D0DA] text-[#5E6B78]'
           }`}>
             <span className="font-semibold">Session Closed</span>
             <span className="text-xs font-mono font-bold">

@@ -110,19 +110,19 @@ export function ApprovalsPage() {
 
           {/* Key Metric Highlights */}
           <div className="grid grid-cols-3 gap-3 self-start sm:self-center text-xs">
-            <div className="p-2 rounded-lg bg-[#F1F4F7] border border-[#D5DDE5]">
-              <span className="text-[10px] text-[#667085] block font-medium">Required</span>
-              <span className="font-bold text-[#1F2933] font-mono">{paper.requiredApprovals} Approvals</span>
+            <div className="p-2.5 rounded-lg bg-[#F0F4F8] border border-[#C7D0DA]">
+              <span className="text-[10px] text-[#5E6B78] block font-medium">Required</span>
+              <span className="font-bold text-[#182230] font-mono">{paper.requiredApprovals} Approvals</span>
             </div>
-            <div className="p-2 rounded-lg bg-[#F1F4F7] border border-[#D5DDE5]">
-              <span className="text-[10px] text-[#667085] block font-medium">Current</span>
-              <span className={`font-bold font-mono ${isQuorumAchieved ? 'text-[#2E7D5B]' : 'text-[#B7791F]'}`}>
+            <div className="p-2.5 rounded-lg bg-[#F0F4F8] border border-[#C7D0DA]">
+              <span className="text-[10px] text-[#5E6B78] block font-medium">Current</span>
+              <span className={`font-bold font-mono transition-colors duration-300 ${isQuorumAchieved ? 'text-[#2E7D5B]' : 'text-[#B7791F]'}`}>
                 {currentApprovals} / {paper.requiredApprovals}
               </span>
             </div>
-            <div className="p-2 rounded-lg bg-[#F1F4F7] border border-[#D5DDE5]">
-              <span className="text-[10px] text-[#667085] block font-medium">Access</span>
-              <span className={`font-bold ${isQuorumAchieved ? 'text-[#2E7D5B]' : 'text-[#667085]'}`}>
+            <div className="p-2.5 rounded-lg bg-[#F0F4F8] border border-[#C7D0DA]">
+              <span className="text-[10px] text-[#5E6B78] block font-medium">Access</span>
+              <span className={`font-bold transition-colors duration-300 ${isQuorumAchieved ? 'text-[#2E7D5B]' : 'text-[#5E6B78]'}`}>
                 {isQuorumAchieved ? 'Authorized' : 'Locked'}
               </span>
             </div>
@@ -132,24 +132,24 @@ export function ApprovalsPage() {
         {/* SECTION 2 — AUTHORIZATION PROGRESS BAR */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-bold text-[#1F2933]">
+            <span className="font-bold text-[#182230]">
               {currentApprovals} / {paper.requiredApprovals} approvals
             </span>
-            <span className="text-[#667085] font-mono text-[11px]">
+            <span className="text-[#5E6B78] font-mono text-[11px]">
               {Math.round(progressPercent)}% Complete
             </span>
           </div>
 
-          <div className="w-full h-2 rounded-full bg-[#F1F4F7] overflow-hidden border border-[#D5DDE5]">
+          <div className="w-full h-2.5 rounded-full bg-[#F0F4F8] overflow-hidden border border-[#C7D0DA]">
             <div
-              className={`h-full transition-all duration-300 ${
+              className={`h-full transition-all duration-500 ease-out rounded-full ${
                 isQuorumAchieved ? 'bg-[#2E7D5B]' : 'bg-[#B7791F]'
               }`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
-          <p className="text-xs text-[#667085]">
+          <p className="text-xs text-[#5E6B78]">
             {isQuorumAchieved
               ? 'Quorum achieved. Access authorization is ready.'
               : 'One approval is still required.'}

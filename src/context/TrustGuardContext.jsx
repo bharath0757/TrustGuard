@@ -185,30 +185,12 @@ export function TrustGuardProvider({ children }) {
     return false;
   });
 
-  // THEME MANAGEMENT (Light / Dark with localStorage persistence, default: light)
-  const [theme, setThemeState] = useState(() => {
-    const saved = localStorage.getItem('trustguard-theme');
-    return saved === 'dark' ? 'dark' : 'light';
-  });
-
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
-    localStorage.setItem('trustguard-theme', theme);
-  }, [theme]);
-
-  const setTheme = (newTheme) => {
-    setThemeState(newTheme);
-  };
-
-  const toggleTheme = () => {
-    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
+    // Ensure dark mode class and attribute are removed from html element
+    document.documentElement.classList.remove('dark');
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.removeItem('trustguard-theme');
+  }, []);
 
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
 
@@ -377,9 +359,6 @@ export function TrustGuardProvider({ children }) {
     resetDemoState,
     sidebarCollapsed,
     toggleSidebar,
-    theme,
-    setTheme,
-    toggleTheme,
   };
 
   return (

@@ -27,12 +27,12 @@ export function Sidebar() {
 
       <aside
         className={cn(
-          'fixed lg:static top-0 bottom-0 left-0 z-40 flex flex-col w-64 bg-white border-r border-[#C7D0DA] dark:border-slate-800 transition-all duration-200 ease-in-out',
+          'fixed lg:static top-0 bottom-0 left-0 z-40 flex flex-col w-64 bg-white border-r border-[#C7D0DA] transition-all duration-200 ease-in-out',
           sidebarCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'translate-x-0'
         )}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-[#C7D0DA] dark:border-slate-800 bg-white">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-[#C7D0DA] bg-white">
           <NavLink to="/" onClick={handleNavClick} className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-[#17324D] flex items-center justify-center text-white shrink-0 shadow-xs">
               <ShieldCheck className="w-5 h-5" />
@@ -77,10 +77,10 @@ export function Sidebar() {
                   onClick={handleNavClick}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-colors',
+                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium transition-all',
                       isActive
-                        ? 'bg-[#F0F5F9] text-[#17324D] font-semibold border border-[#D5DDE5]'
-                        : 'text-[#475467] hover:text-[#17324D] hover:bg-[#F1F4F7] border border-transparent'
+                        ? 'bg-[#EAF2F8] text-[#17324D] font-semibold border border-[#C7D0DA] shadow-2xs'
+                        : 'text-[#5E6B78] hover:text-[#182230] hover:bg-[#F0F4F8] border border-transparent'
                     )
                   }
                 >
@@ -104,16 +104,16 @@ export function Sidebar() {
         </div>
 
         {/* Subtle Footer */}
-        <div className="p-3 border-t border-[#C7D0DA] dark:border-slate-800 bg-[#F1F4F7]">
+        <div className="p-3 border-t border-[#C7D0DA] bg-[#F0F4F8]">
           {!sidebarCollapsed ? (
-            <div className="p-2.5 rounded-lg bg-white border border-[#D5DDE5] text-xs">
+            <div className="p-2.5 rounded-lg bg-white border border-[#C7D0DA] text-xs shadow-2xs">
               <span className="font-semibold text-[#17324D] block">Security Policy Active</span>
-              <p className="text-[11px] text-[#667085] mt-0.5 leading-tight">
+              <p className="text-[11px] text-[#5E6B78] mt-0.5 leading-tight">
                 Access control policy enforced across all nodes.
               </p>
             </div>
           ) : (
-            <div className="flex justify-center text-[#667085] py-1">
+            <div className="flex justify-center text-[#5E6B78] py-1">
               <ShieldCheck className="w-4 h-4 text-[#17324D]" />
             </div>
           )}

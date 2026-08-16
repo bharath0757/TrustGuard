@@ -12,19 +12,19 @@ export function Card({
     return (
       <div
         className={cn(
-          'rounded-xl bg-white border border-[#C7D0DA] dark:border-slate-800 shadow-xs overflow-hidden text-[#1F2933] dark:text-slate-100',
+          'rounded-xl bg-white border border-[#C7D0DA] shadow-xs overflow-hidden text-[#182230]',
           className
         )}
         {...props}
       >
         {header && (
-          <div className="px-5 py-3.5 border-b border-[#D5DDE5] dark:border-slate-800 bg-[#F1F4F7] dark:bg-slate-900/60 flex items-center justify-between text-sm font-semibold text-[#1F2933] dark:text-slate-100">
+          <div className="px-5 py-3.5 border-b border-[#D5DDE5] bg-[#F1F4F7] flex items-center justify-between text-sm font-semibold text-[#182230]">
             {header}
           </div>
         )}
         <div className="p-5">{children}</div>
         {footer && (
-          <div className="px-5 py-3.5 border-t border-[#D5DDE5] dark:border-slate-800 bg-[#F1F4F7] dark:bg-slate-900/60">
+          <div className="px-5 py-3.5 border-t border-[#D5DDE5] bg-[#F1F4F7]">
             {footer}
           </div>
         )}
@@ -35,7 +35,7 @@ export function Card({
   return (
     <div
       className={cn(
-        'rounded-xl bg-white border border-[#C7D0DA] dark:border-slate-800 shadow-xs text-[#1F2933] dark:text-slate-100',
+        'rounded-xl bg-white border border-[#C7D0DA] shadow-xs text-[#182230]',
         className
       )}
       {...props}
@@ -44,3 +44,4 @@ export function Card({
     </div>
   );
 }
+

@@ -2,12 +2,12 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 const variants = {
-  default: 'bg-[#F2F4F7] text-[#344054] border-[#EAECF0]',
-  info: 'bg-[#F0F5F9] text-[#17324D] border-[#D8E6F0]',
-  success: 'bg-[#ECFDF3] text-[#2E7D5B] border-[#D1FADF]',
-  warning: 'bg-[#FFFAEB] text-[#B7791F] border-[#FEDF89]',
-  danger: 'bg-[#FEF3F2] text-[#C44747] border-[#FECDCA]',
-  neutral: 'bg-[#F8F9FA] text-[#475467] border-[#E4E7EC]',
+  default: 'bg-[#F0F4F8] text-[#182230] border-[#C7D0DA]',
+  info: 'bg-[#EAF2F8] text-[#17324D] border-[#C7D0DA]',
+  success: 'bg-[#EAF5F0] text-[#2E7D5B] border-[#B2D8C7]',
+  warning: 'bg-[#FAF3E7] text-[#B7791F] border-[#E8D4B5]',
+  danger: 'bg-[#FDF2F2] text-[#C44747] border-[#F2C2C2]',
+  neutral: 'bg-[#F0F4F8] text-[#5E6B78] border-[#C7D0DA]',
 };
 
 const sizes = {

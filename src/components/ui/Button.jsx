@@ -2,11 +2,11 @@ import React from 'react';
 import { cn } from '../../utils/cn';
 
 const variants = {
-  primary: 'bg-[#17324D] hover:bg-[#1e3f60] text-white font-medium shadow-xs border border-transparent active:scale-[0.99]',
-  secondary: 'bg-white hover:bg-[#F9FAFB] text-[#344054] font-medium border border-[#D0D5DD] shadow-xs active:bg-[#F2F4F7]',
-  danger: 'bg-[#C44747] hover:bg-[#ab3c3c] text-white font-medium shadow-xs border border-transparent',
-  outline: 'border border-[#D0D5DD] hover:border-[#98A2B3] text-[#344054] hover:text-[#1F2933] bg-white hover:bg-[#F9FAFB] shadow-xs',
-  ghost: 'text-[#475467] hover:text-[#1F2933] hover:bg-[#F2F4F7] bg-transparent',
+  primary: 'bg-gradient-to-b from-[#17324D] to-[#1F3D5C] hover:from-[#1F3D5C] hover:to-[#17324D] text-white font-semibold shadow-xs hover:shadow-sm border border-[#17324D] hover:-translate-y-0.5 active:translate-y-0',
+  secondary: 'bg-white hover:bg-[#F0F4F8] text-[#182230] font-medium border border-[#C7D0DA] shadow-xs hover:border-[#AAB7C4] hover:-translate-y-0.5 active:translate-y-0',
+  danger: 'bg-gradient-to-b from-[#C44747] to-[#B03A3A] hover:from-[#B03A3A] hover:to-[#C44747] text-white font-semibold shadow-xs hover:shadow-sm border border-[#C44747] hover:-translate-y-0.5 active:translate-y-0',
+  outline: 'border border-[#C7D0DA] hover:border-[#AAB7C4] text-[#182230] bg-white hover:bg-[#F0F4F8] shadow-xs hover:-translate-y-0.5 active:translate-y-0',
+  ghost: 'text-[#5E6B78] hover:text-[#182230] hover:bg-[#F0F4F8] bg-transparent',
 };
 
 const sizes = {
@@ -30,7 +30,7 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center transition-colors duration-150 font-medium focus:outline-none focus:ring-2 focus:ring-[#17324D]/20 focus:border-[#17324D] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none',
+        'inline-flex items-center justify-center transition-all duration-150 font-medium focus:outline-none focus:ring-2 focus:ring-[#17324D]/20 focus:border-[#17324D] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none cursor-pointer select-none',
         variants[variant] || variants.primary,
         sizes[size] || sizes.md,
         className
