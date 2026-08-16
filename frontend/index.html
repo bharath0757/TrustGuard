@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrustGuard — Zero-Trust Question Paper Distribution</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --accent-cyan: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-purple: #c084fc;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--card-border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .shield-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: #020617;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      color: var(--accent-emerald);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--accent-emerald);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 3.5rem;
+    }
+
+    .hero h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #ffffff, var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      backdrop-filter: blur(16px);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: var(--accent-cyan);
+    }
+
+    .card h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .interactive-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(16px);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent-cyan), #0284c7);
+      color: #020617;
+      font-weight: 600;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    pre {
+      background: rgba(2, 6, 23, 0.8);
+      border: 1px solid var(--card-border);
+      padding: 1.25rem;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      overflow-x: auto;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="shield-icon">TG</div>
+      <span>TrustGuard</span>
+    </div>
+    <div class="status-badge" id="api-status-badge">
+      <div class="pulse-dot"></div>
+      <span id="api-status-text">Checking Backend API...</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Zero-Trust Question-Paper Distribution</h1>
+      <p>Eliminating persistent storage, mitigating insider risk, and removing single points of trust in examination distribution pipelines.</p>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Zero Persistent Storage</h3>
+        <p>Question paper payloads and decryption key shares reside exclusively in ephemeral RAM with strict TTL expiration. Nothing touches permanent disk storage.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔐</div>
+        <h3>Multi-Party Threshold Quorum</h3>
+        <p>Requires $k$-of-$n$ cryptographic Key Guardian approvals before payload unlocks. Eliminates unilateral insider leak vectors.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">📡</div>
+        <h3>Just-In-Time Ephemeral Streaming</h3>
+        <p>Time-locked stream distribution delivers payload directly into memory at exam start time with dynamic center-specific watermarking.</p>
+      </div>
+    </section>
+
+    <section class="interactive-panel">
+      <div class="panel-header">
+        <h2>FastAPI Backend Health Monitor</h2>
+        <button class="btn" onclick="testHealthEndpoint()">Ping /api/health</button>
+      </div>
+      <pre id="api-response-box">Click "Ping /api/health" to test live serverless function response.</pre>
+    </section>
+  </main>
+
+  <footer>
+    TrustGuard Cybersecurity Prototype &copy; 2026 — Deployed on Vercel
+  </footer>
+
+  <script>
+    async function testHealthEndpoint() {
+      const box = document.getElementById('api-response-box');
+      const badgeText = document.getElementById('api-status-text');
+      box.textContent = 'Sending request to /api/health...';
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        box.textContent = JSON.stringify(data, null, 2);
+        if (res.ok) {
+          badgeText.textContent = 'Backend API: Online';
+        } else {
+          badgeText.textContent = 'Backend API: Error (' + res.status + ')';
+        }
+      } catch (err) {
+        box.textContent = 'Error connecting to API: ' + err.message;
+        badgeText.textContent = 'Backend API: Offline';
+      }
+    }
+
+    // Auto-check health on load
+    window.addEventListener('DOMContentLoaded', testHealthEndpoint);
+  </script>
+
+</body>
+</html>
