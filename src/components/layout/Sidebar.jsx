@@ -1,13 +1,16 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { ShieldCheck, ChevronLeft } from 'lucide-react';
-import { NAVIGATION_ITEMS } from '../../data/navigation';
+import { getNavigationForRole } from '../../data/navigation';
 import { useTrustGuard } from '../../hooks/useTrustGuard';
+import { useAuth } from '../../context/AuthContext';
 import { cn } from '../../utils/cn';
 import { Badge, Button } from '../ui';
 
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useTrustGuard();
+  const { role, roleLabel } = useAuth();
+  const navItems = getNavigationForRole(role);
 
   const handleNavClick = () => {
     if (typeof window !== 'undefined' && window.innerWidth < 1024 && !sidebarCollapsed) {
@@ -68,7 +71,7 @@ export function Sidebar() {
         {/* Navigation List */}
         <div className="flex-1 overflow-y-auto py-4 px-3 bg-white">
           <nav className="space-y-1">
-            {NAVIGATION_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <NavLink

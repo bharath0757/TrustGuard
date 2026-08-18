@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "version": "0.2",
+  "words": [
+    "trustguard",
+    "TrustGuard",
+    "examcenter",
+    "Topbar",
+    "aiosqlite",
+    "fakeredis",
+    "asyncpg",
+    "psycopg",
+    "pyjwt",
+    "uvicorn",
+    "pydantic",
+    "tailwindcss",
+    "oxlint",
+    "selectin"
+  ]
+}

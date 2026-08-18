@@ -1,7 +1,12 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { Menu, User, ShieldCheck, RotateCcw } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Menu, User, ShieldCheck, RotateCcw, LogOut } from 'lucide-react';
 import { useTrustGuard } from '../../hooks/useTrustGuard';
+<<<<<<< Updated upstream:src/components/layout/Topbar.jsx
+=======
+import { useAuth } from '../../context/AuthContext';
+import { useSystemHealth } from '../../hooks/useSystemHealth';
+>>>>>>> Stashed changes:frontend/src/components/layout/Topbar.jsx
 import { Button } from '../ui';
 
 const ROUTE_NAMES = {
@@ -17,9 +22,20 @@ const ROUTE_NAMES = {
 
 export function Topbar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { toggleSidebar, resetDemoState } = useTrustGuard();
+<<<<<<< Updated upstream:src/components/layout/Topbar.jsx
+=======
+  const { user, roleLabel, roleColor, logout } = useAuth();
+  const { isBackendConnected, status: healthStatus, database: dbStatus } = useSystemHealth();
+>>>>>>> Stashed changes:frontend/src/components/layout/Topbar.jsx
 
   const currentRouteName = ROUTE_NAMES[location.pathname] || 'Dashboard';
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-[#C7D0DA] bg-white px-4 sm:px-6 flex items-center justify-between shadow-xs transition-colors duration-150">
@@ -42,7 +58,7 @@ export function Topbar() {
         </div>
       </div>
 
-      {/* Right: System Status, Reset Demo & User Profile */}
+      {/* Right: System Status, Reset Demo, User Profile & Logout */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* System Status: Secure */}
         <div className="hidden sm:flex items-center gap-2 bg-[#ECFDF3] border border-[#D1FADF] px-3 py-1.5 rounded-md text-xs">
@@ -64,17 +80,28 @@ export function Topbar() {
 
         {/* User / Profile */}
         <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-[#D5DDE5]">
-          <div className="w-8 h-8 rounded-full bg-[#F0F5F9] border border-[#D5DDE5] flex items-center justify-center text-[#17324D] text-xs font-semibold">
-            <User className="w-4 h-4" />
+          <div className={`w-8 h-8 rounded-full ${roleColor.bg} flex items-center justify-center text-white text-xs font-bold`}>
+            {user?.username?.[0]?.toUpperCase() || <User className="w-4 h-4" />}
           </div>
           <div className="hidden md:flex flex-col text-left">
             <span className="text-xs font-semibold text-[#182230] leading-tight">
-              Exam Administrator
+              {user?.username || 'User'}
             </span>
-            <span className="text-[11px] text-[#667085] leading-tight">
-              Authorized Officer
+            <span className={`text-[10px] font-medium leading-tight ${roleColor.badge.split(' ')[1] || 'text-[#667085]'}`}>
+              {roleLabel}
             </span>
           </div>
+
+          {/* Logout Button */}
+          <button
+            type="button"
+            onClick={handleLogout}
+            title="Sign out"
+            aria-label="Sign out"
+            className="p-1.5 rounded-lg text-[#667085] hover:text-[#C44747] hover:bg-[#FDF2F2] transition-colors cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </header>
