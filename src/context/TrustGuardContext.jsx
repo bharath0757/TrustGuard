@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { api, setToken, getToken } from '../api/client';
 
 export const TrustGuardContext = createContext(null);
 
@@ -58,7 +59,6 @@ const INITIAL_PAPERS_LIST = [
   },
 ];
 
-// Pristine baseline alerts with 0 active threats
 const INITIAL_THREAT_ALERTS = [
   {
     id: 'ALT-104',
@@ -101,7 +101,6 @@ const INITIAL_THREAT_ALERTS = [
   },
 ];
 
-// Pristine baseline audit log
 const INITIAL_AUDIT_EVENTS = [
   {
     id: 'EVT-1002',
@@ -147,28 +146,6 @@ const INITIAL_AUDIT_EVENTS = [
     description: 'Officer A (Examination Controller) signed the initial authorization request.',
     requestedAction: 'Sign authorization request',
   },
-  {
-    id: 'EVT-1007',
-    time: '09:38:00',
-    type: 'Paper',
-    actor: 'System',
-    paper: 'NEET-MOCK-002',
-    action: 'Encryption completed',
-    result: 'Success',
-    description: 'Medical entrance paper encrypted with zero-trust envelope protection.',
-    requestedAction: 'Apply zero-trust encryption',
-  },
-  {
-    id: 'EVT-1008',
-    time: '09:35:12',
-    type: 'System',
-    actor: 'System',
-    paper: 'DEMO-004',
-    action: 'Integrity check completed',
-    result: 'Success',
-    description: 'Scheduled integrity verification confirmed all stored fragments are unaltered.',
-    requestedAction: 'Verify storage node integrity',
-  },
 ];
 
 export function TrustGuardProvider({ children }) {
@@ -177,7 +154,9 @@ export function TrustGuardProvider({ children }) {
   const [papersList, setPapersList] = useState(INITIAL_PAPERS_LIST);
   const [threatAlerts, setThreatAlerts] = useState(INITIAL_THREAT_ALERTS);
   const [auditEvents, setAuditEvents] = useState(INITIAL_AUDIT_EVENTS);
-  const [activeThreatCount, setActiveThreatCount] = useState(0); // 0 active threats initially
+  const [activeThreatCount, setActiveThreatCount] = useState(0);
+  const [streamContent, setStreamContent] = useState('');
+  const [currentUser, setCurrentUser] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
       return window.innerWidth < 1024;
@@ -185,22 +164,109 @@ export function TrustGuardProvider({ children }) {
     return false;
   });
 
+  // Ensure clean styling setup
   useEffect(() => {
-    // Ensure dark mode class and attribute are removed from html element
     document.documentElement.classList.remove('dark');
     document.documentElement.removeAttribute('data-theme');
     localStorage.removeItem('trustguard-theme');
   }, []);
 
+  // Initialize Backend Session & Sync Real Data
+  useEffect(() => {
+    async function initBackendConnection() {
+      try {
+        // 1. Check or establish auth session
+        if (!getToken()) {
+          const authRes = await api.login({ username: 'admin_user', password: 'SecurePassword123' }).catch(async () => {
+            // Auto register if user doesn't exist yet
+            await api.register({
+              username: 'admin_user',
+              email: 'admin@trustguard.org',
+              password: 'SecurePassword123',
+              role: 'ADMIN',
+            });
+            return await api.login({ username: 'admin_user', password: 'SecurePassword123' });
+          });
+          if (authRes && authRes.access_token) {
+            setToken(authRes.access_token);
+          }
+        }
+
+        // Fetch current user details
+        const me = await api.getMe().catch(() => null);
+        if (me) setCurrentUser(me);
+
+        // Sync Exams from Backend
+        const backendExams = await api.getExams().catch(() => []);
+        if (Array.isArray(backendExams) && backendExams.length > 0) {
+          const formattedExams = backendExams.map((e) => ({
+            id: e.id,
+            examination: e.title,
+            securityStatus: e.status === 'UNLOCKED' ? 'Protected' : 'Pending',
+            approvals: `${e.guardians ? e.guardians.length : 0} / ${e.required_quorum}`,
+            access: e.status === 'UNLOCKED' ? 'Authorized' : 'Locked',
+            lastUpdated: new Date(e.updated_at || e.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          }));
+          setPapersList(formattedExams);
+
+          // Update active paper from latest backend exam
+          const latest = backendExams[0];
+          setPaper({
+            id: latest.id,
+            name: latest.title,
+            security: 'Protected',
+            encryption: 'Complete',
+            fragmentation: 'Complete',
+            distribution: 'Complete',
+            requiredApprovals: latest.required_quorum,
+            currentApprovals: latest.guardians ? latest.guardians.length : 2,
+            decryption: latest.status === 'UNLOCKED' ? 'Authorized' : 'Locked',
+            examAccess: latest.status === 'UNLOCKED' ? 'Ready' : latest.status === 'COMPLETED' ? 'Closed' : 'Locked',
+            examWindow: '09:55 – 12:00',
+            lastUpdated: new Date(latest.updated_at || latest.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          });
+        }
+
+        // Sync Audit Events from Backend
+        const backendAudits = await api.getAuditEvents().catch(() => []);
+        if (Array.isArray(backendAudits) && backendAudits.length > 0) {
+          const formattedAudits = backendAudits.map((a) => ({
+            id: a.id.slice(0, 8),
+            time: new Date(a.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+            type: a.action.includes('STREAM') ? 'Paper' : a.action.includes('APPROVED') ? 'Approval' : 'System',
+            actor: a.actor_id ? a.actor_id.slice(0, 8) : 'System',
+            paper: a.exam_id ? a.exam_id.slice(0, 8) : 'JEE-MOCK-001',
+            action: a.action,
+            result: a.action.includes('BLOCKED') ? 'Blocked' : 'Success',
+            description: a.details_json || `Action ${a.action} executed successfully.`,
+            requestedAction: a.action,
+          }));
+          setAuditEvents(formattedAudits);
+        }
+      } catch (err) {
+        console.warn('Backend sync initialization note:', err.message);
+      }
+    }
+
+    initBackendConnection();
+  }, []);
+
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
 
-  // DEMO FLOW 2 — SIMULATE UNAUTHORIZED ACCESS
-  const triggerAttackSimulation = ({ scenarioName, paperId }) => {
-    const targetPaper = paperId || 'JEE-MOCK-001';
+  // DEMO FLOW 2 — SIMULATE UNAUTHORIZED ACCESS & AUDIT LOGGING
+  const triggerAttackSimulation = async ({ scenarioName, paperId }) => {
+    const targetPaper = paperId || paper.id || 'JEE-MOCK-001';
     const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const fullTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
     setActiveThreatCount((prev) => prev + 1);
+
+    // Ingest event to backend audit trail if connected
+    await api.logAuditEvent({
+      exam_id: paper.id,
+      action: 'UNAUTHORIZED_ACCESS_ATTEMPT_BLOCKED',
+      details_json: JSON.stringify({ scenario: scenarioName, targetPaper }),
+    }).catch(() => null);
 
     const newAlert = {
       id: `ALT-${Date.now().toString().slice(-4)}`,
@@ -240,10 +306,17 @@ export function TrustGuardProvider({ children }) {
     setAuditEvents((prev) => [newAuditEvent, ...prev]);
   };
 
-  // DEMO FLOW 5 — FINAL QUORUM APPROVAL
-  const completeFinalApproval = () => {
-    const currentTime = '09:45';
-    const fullTime = '09:45:00';
+  // DEMO FLOW 5 — FINAL QUORUM APPROVAL & BACKEND CONSENSUS SUBMISSION
+  const completeFinalApproval = async () => {
+    const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const fullTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // Call Backend Consensus Approval API if valid backend exam ID exists
+    if (paper.id && paper.id.includes('-') && paper.id.length > 20) {
+      await api.submitApproval(paper.id, {
+        share_token: `MOCK_SHARE_K2_N2_IDX2_HASH12345678_officerC`,
+      }).catch((err) => console.warn('Consensus approval call note:', err.message));
+    }
 
     setOfficers((prev) => ({
       ...prev,
@@ -263,7 +336,7 @@ export function TrustGuardProvider({ children }) {
 
     setPapersList((prev) =>
       prev.map((p) =>
-        p.id === 'JEE-MOCK-001'
+        p.id === paper.id || p.id === 'JEE-MOCK-001'
           ? { ...p, approvals: '3 / 3', access: 'Authorized' }
           : p
       )
@@ -274,7 +347,7 @@ export function TrustGuardProvider({ children }) {
       time: fullTime,
       type: 'Approval',
       actor: 'Officer C',
-      paper: 'JEE-MOCK-001',
+      paper: paper.id,
       action: 'Final approval received',
       result: 'Success',
       description: 'Officer C signed the authorization request. Quorum achieved (3 of 3).',
@@ -284,9 +357,15 @@ export function TrustGuardProvider({ children }) {
     setAuditEvents((prev) => [newAuditEvent, ...prev]);
   };
 
-  // DEMO FLOW 8 — OPEN SECURE SESSION
-  const openSecurePaperSession = () => {
-    const fullTime = '09:55:00';
+  // DEMO FLOW 8 — OPEN SECURE SESSION & JIT EPHEMERAL STREAM
+  const openSecurePaperSession = async () => {
+    const fullTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // Attempt streaming from backend if real exam ID
+    if (paper.id && paper.id.includes('-') && paper.id.length > 20) {
+      const streamed = await api.streamPayload(paper.id).catch((err) => null);
+      if (streamed) setStreamContent(streamed);
+    }
 
     setPaper((prev) => ({
       ...prev,
@@ -298,7 +377,7 @@ export function TrustGuardProvider({ children }) {
       time: fullTime,
       type: 'System',
       actor: 'Exam Center #1',
-      paper: 'JEE-MOCK-001',
+      paper: paper.id,
       action: 'Secure exam-paper access opened',
       result: 'Success',
       description: 'Authorized exam access session initialized inside verified examination terminal.',
@@ -308,21 +387,27 @@ export function TrustGuardProvider({ children }) {
     setAuditEvents((prev) => [newAuditEvent, ...prev]);
   };
 
-  // DEMO FLOW 9 — CLOSE SESSION
-  const closeSecurePaperSession = () => {
-    const fullTime = '12:00:00';
+  // DEMO FLOW 9 — CLOSE SESSION & EPHEMERAL PURGE
+  const closeSecurePaperSession = async () => {
+    const fullTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+    // Call backend ephemeral purge API
+    if (paper.id && paper.id.includes('-') && paper.id.length > 20) {
+      await api.purgeEphemeral(paper.id).catch((err) => console.warn('Purge note:', err.message));
+    }
 
     setPaper((prev) => ({
       ...prev,
       examAccess: 'Closed',
     }));
+    setStreamContent('');
 
     const newAuditEvent = {
       id: `EVT-${Date.now().toString().slice(-4)}`,
       time: fullTime,
       type: 'System',
       actor: 'Exam Center #1',
-      paper: 'JEE-MOCK-001',
+      paper: paper.id,
       action: 'Exam-paper access session closed',
       result: 'Success',
       description: 'Exam-paper access session concluded and terminal memory purged.',
@@ -332,7 +417,6 @@ export function TrustGuardProvider({ children }) {
     setAuditEvents((prev) => [newAuditEvent, ...prev]);
   };
 
-  // RESET DEMO STATE — Returns to pristine initial demonstration state
   const resetDemoState = () => {
     setPaper(INITIAL_PAPER);
     setOfficers(INITIAL_OFFICERS);
@@ -340,6 +424,7 @@ export function TrustGuardProvider({ children }) {
     setThreatAlerts(INITIAL_THREAT_ALERTS);
     setAuditEvents(INITIAL_AUDIT_EVENTS);
     setActiveThreatCount(0);
+    setStreamContent('');
   };
 
   const isQuorumAchieved = paper.currentApprovals >= paper.requiredApprovals;
@@ -351,6 +436,8 @@ export function TrustGuardProvider({ children }) {
     threatAlerts,
     auditEvents,
     activeThreatCount,
+    streamContent,
+    currentUser,
     isQuorumAchieved,
     triggerAttackSimulation,
     completeFinalApproval,
