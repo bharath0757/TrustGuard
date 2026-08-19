@@ -308,6 +308,16 @@ class ExamService:
         paper.status = "AWAITING_APPROVAL"
         paper.staged_at = datetime.now(timezone.utc)
 
+        # Record SHA-256 payload hash to immutable blockchain ledger
+        from app.services.blockchain_service import BlockchainService
+        await BlockchainService.record_payload_hash(
+            db=db,
+            exam_id=exam.id,
+            payload_hash=payload_hash,
+            paper_id=paper.id,
+            recorded_by=actor_id,
+        )
+
         await db.commit()
         await db.refresh(exam)
 

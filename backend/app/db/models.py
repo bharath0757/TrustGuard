@@ -248,3 +248,18 @@ class AuditEvent(Base):
     ip_address = Column(String(45), nullable=True)
     details_json = Column(Text, nullable=True)
     timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
+
+
+class BlockchainBlock(Base):
+    """Immutable hash-chain ledger block for question paper integrity verification."""
+    __tablename__ = "blockchain_ledger"
+
+    index = Column(Integer, primary_key=True, autoincrement=True)
+    block_hash = Column(String(64), nullable=False, unique=True, index=True)
+    prev_block_hash = Column(String(64), nullable=False)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    exam_id = Column(String(36), nullable=False, index=True)
+    paper_id = Column(String(36), nullable=True, index=True)
+    payload_hash = Column(String(64), nullable=False, index=True)  # SHA-256 integrity hash
+    recorded_by = Column(String(36), nullable=True)
+
