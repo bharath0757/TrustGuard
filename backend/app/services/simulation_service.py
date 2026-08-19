@@ -82,6 +82,7 @@ class SimulationService:
         scenario_id: str,
         target_paper_id: Optional[str] = None,
         actor_override: Optional[str] = None,
+        exam_id: Optional[str] = None,
     ) -> SimulationResponse:
         """
         Execute real controlled security simulation against TrustGuard backend:
@@ -101,7 +102,7 @@ class SimulationService:
         if not scenario_info:
             scenario_info = AVAILABLE_SCENARIOS[0]
 
-        target_paper = target_paper_id or scenario_info.default_target
+        target_paper = exam_id or target_paper_id or scenario_info.default_target
         simulated_actor = actor_override or scenario_info.simulated_actor
         now = datetime.now(timezone.utc)
         timestamp_str = now.isoformat()

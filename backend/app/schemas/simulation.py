@@ -20,6 +20,7 @@ class SimulationRequest(BaseModel):
     scenario_id: str = Field(..., description="Scenario identifier, e.g. UNAUTHORIZED_ACCESS, INSIDER_ATTEMPT, etc.")
     target_paper_id: Optional[str] = Field(default="JEE-MOCK-001", description="Target examination paper identifier")
     actor_override: Optional[str] = None
+    exam_id: Optional[str] = None
 
 
 class SimulationResponse(BaseModel):
