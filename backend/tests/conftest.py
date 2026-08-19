@@ -16,7 +16,8 @@ if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
 from backend.main import app
-from app.db.database import init_db
+from app.db.database import get_db, init_db
+from app.db.models import Base
 
 # Test database URL (SQLite in-memory for fast execution)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -34,10 +35,23 @@ TestingSessionLocal = async_sessionmaker(
 )
 
 
+async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with TestingSessionLocal() as session:
+        try:
+            yield session
+        finally:
+            await session.close()
+
+
 @pytest.fixture(autouse=True)
 async def setup_test_db():
-    """Ensure database tables are initialized before tests run."""
-    await init_db()
+    """Ensure in-memory database tables are initialized and dependency overridden."""
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    app.dependency_overrides[get_db] = override_get_db
+    yield
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture

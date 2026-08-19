@@ -2,7 +2,7 @@
 
 import os
 from typing import AsyncGenerator
-
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.core.config import settings
@@ -38,6 +38,11 @@ AsyncSessionLocal = async_sessionmaker(
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        if "sqlite" in settings.DATABASE_URL:
+            try:
+                await conn.execute(text("ALTER TABLE exams ADD COLUMN description VARCHAR(1000)"))
+            except Exception:
+                pass
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
