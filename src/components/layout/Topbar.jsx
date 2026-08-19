@@ -2,11 +2,8 @@ import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu, User, ShieldCheck, RotateCcw, LogOut } from 'lucide-react';
 import { useTrustGuard } from '../../hooks/useTrustGuard';
-<<<<<<< Updated upstream:src/components/layout/Topbar.jsx
-=======
 import { useAuth } from '../../context/AuthContext';
 import { useSystemHealth } from '../../hooks/useSystemHealth';
->>>>>>> Stashed changes:frontend/src/components/layout/Topbar.jsx
 import { Button } from '../ui';
 
 const ROUTE_NAMES = {
@@ -24,11 +21,8 @@ export function Topbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { toggleSidebar, resetDemoState } = useTrustGuard();
-<<<<<<< Updated upstream:src/components/layout/Topbar.jsx
-=======
   const { user, roleLabel, roleColor, logout } = useAuth();
   const { isBackendConnected, status: healthStatus, database: dbStatus } = useSystemHealth();
->>>>>>> Stashed changes:frontend/src/components/layout/Topbar.jsx
 
   const currentRouteName = ROUTE_NAMES[location.pathname] || 'Dashboard';
 

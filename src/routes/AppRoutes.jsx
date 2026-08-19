@@ -12,12 +12,9 @@ import {
   AttackSimulatorPage,
   AuditPage, 
   ExamCenterPage,
-<<<<<<< Updated upstream:src/routes/AppRoutes.jsx
-=======
   LiveExamPage,
   ExamReportPage,
   StudentExamPortalPage,
->>>>>>> Stashed changes:frontend/src/routes/AppRoutes.jsx
   NotFoundPage 
 } from '../pages';
 
@@ -99,10 +96,6 @@ export function AppRoutes() {
 
         {/* Exam Center — exam ops + students can view */}
         <Route path="exam-center" element={<ExamCenterPage />} />
-<<<<<<< Updated upstream:src/routes/AppRoutes.jsx
-        
-        {/* Compatibility redirects */}
-=======
 
         {/* Live Exam — accessible to all (students see exam, staff monitor) */}
         <Route path="live-exam/:examId" element={<LiveExamPage />} />
@@ -114,14 +107,13 @@ export function AppRoutes() {
           </ProtectedRoute>
         } />
         
-        {/* Convenience and Compatibility shortcuts */}
+        {/* Convenience and Compatibility redirects */}
         <Route path="guardian" element={<Navigate to="/approvals" replace />} />
         <Route path="student" element={<Navigate to="/student/exam" replace />} />
         <Route path="attacker" element={<Navigate to="/attack-simulator" replace />} />
         <Route path="report/:examId" element={<Navigate to="/exam-report/:examId" replace />} />
         <Route path="reports/:examId" element={<Navigate to="/exam-report/:examId" replace />} />
         <Route path="exam-reports/:examId" element={<Navigate to="/exam-report/:examId" replace />} />
->>>>>>> Stashed changes:frontend/src/routes/AppRoutes.jsx
         <Route path="alerts" element={<Navigate to="/threat-alerts" replace />} />
         <Route path="settings" element={<Navigate to="/exam-center" replace />} />
         

@@ -9,8 +9,6 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-<<<<<<< Updated upstream:vite.config.js
-=======
   server: {
     port: 5173,
     host: true,
@@ -26,7 +24,6 @@ export default defineConfig({
       },
     },
   },
->>>>>>> Stashed changes:frontend/vite.config.js
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
