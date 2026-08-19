@@ -1,3 +1,22 @@
+[project]
+name = "trustguard"
+version = "0.1.0"
+description = "TrustGuard Zero-Trust Question Paper Distribution API"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+    "sqlalchemy>=2.0.0",
+    "aiosqlite>=0.19.0",
+    "PyJWT>=2.8.0",
+    "python-multipart>=0.0.6",
+    "cryptography>=41.0.0",
+    "redis>=5.0.0",
+    "httpx>=0.24.0",
+]
+
 [tool.pytest.ini_options]
 minversion = "8.0"
 addopts = "-ra -q"
