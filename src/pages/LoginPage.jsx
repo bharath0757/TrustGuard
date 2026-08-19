@@ -25,7 +25,8 @@ export function LoginPage() {
 
     try {
       if (isRegister) {
-        await register({ username, password, role });
+        const email = `${username.toLowerCase().replace(/[^a-z0-9]/g, '')}@trustguard.org`;
+        await register({ username, email, password, role });
         // After registration, login
         await login({ username, password });
       } else {

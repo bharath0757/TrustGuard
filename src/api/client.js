@@ -13,10 +13,12 @@ export const removeToken = () => localStorage.removeItem(TOKEN_KEY);
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  const headers = {
-    'Content-Type': 'application/json',
-    ...options.headers,
-  };
+  const headers = { ...options.headers };
+
+  // Set Content-Type only if not FormData
+  if (!(options.body instanceof FormData) && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const token = getToken();
   if (token && !headers['Authorization']) {
@@ -54,16 +56,26 @@ export const api = {
   register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   getMe: () => request('/auth/me'),
+  seedUsers: () => request('/users/seed', { method: 'POST' }),
+
+  // Question Papers
+  uploadPaper: (formData) => request('/papers/upload', { method: 'POST', body: formData }),
+  getPapers: () => request('/papers/'),
+  getPaper: (id) => request(`/papers/${id}`),
 
   // Exams
   getExams: () => request('/exams/'),
   getExam: (id) => request(`/exams/${id}`),
   createExam: (data) => request('/exams/', { method: 'POST', body: JSON.stringify(data) }),
   assignGuardian: (id, data) => request(`/exams/${id}/guardians`, { method: 'POST', body: JSON.stringify(data) }),
+  stagePaper: (id, data) => request(`/exams/${id}/stage-paper`, { method: 'POST', body: JSON.stringify(data) }),
   stagePayload: (id, data) => request(`/exams/${id}/stage-payload`, { method: 'POST', body: JSON.stringify(data) }),
 
   // Consensus
-  submitApproval: (id, data) => request(`/consensus/${id}/approve`, { method: 'POST', body: JSON.stringify(data) }),
+  submitApproval: (id, data) => {
+    const payload = typeof data === 'string' ? { share_token: data } : data;
+    return request(`/consensus/${id}/approve`, { method: 'POST', body: JSON.stringify(payload) });
+  },
   getQuorumStatus: (id) => request(`/consensus/${id}/status`),
 
   // Ephemeral Distribution
@@ -83,7 +95,8 @@ export const api = {
   },
   purgeEphemeral: (id) => request(`/distribution/${id}/purge`, { method: 'POST' }),
 
-  // Audit
+  // Audit & Simulation
   getAuditEvents: (examId) => request(examId ? `/audit/events?exam_id=${examId}` : '/audit/events'),
   logAuditEvent: (data) => request('/audit/events', { method: 'POST', body: JSON.stringify(data) }),
+  runSimulation: (data) => request('/simulation/run', { method: 'POST', body: JSON.stringify(data) }),
 };

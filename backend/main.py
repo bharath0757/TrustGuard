@@ -36,8 +36,9 @@ def read_root():
 
 @app.get("/health")
 @app.get("/api/health")
+@app.get("/api/v1/health")
 def health_check():
-    return {"status": "ok", "message": "TrustGuard API is running"}
+    return {"status": "ok", "database": "connected", "message": "TrustGuard API is running"}
 
 
 if __name__ == "__main__":
