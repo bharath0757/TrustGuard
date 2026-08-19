@@ -16,6 +16,7 @@ if backend_dir not in sys.path:
     sys.path.insert(0, backend_dir)
 
 from backend.main import app
+from app.db.database import init_db
 
 # Test database URL (SQLite in-memory for fast execution)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -33,9 +34,31 @@ TestingSessionLocal = async_sessionmaker(
 )
 
 
+@pytest.fixture(autouse=True)
+async def setup_test_db():
+    """Ensure database tables are initialized before tests run."""
+    await init_db()
+
+
 @pytest.fixture
 async def async_client() -> AsyncGenerator[AsyncClient, None]:
     """Async HTTP client targeting FastAPI application."""
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         yield client
+
+
+async def create_user_and_login(client: AsyncClient, username: str, role: str) -> dict:
+    """Helper to create user and return auth headers."""
+    reg_payload = {
+        "username": username,
+        "email": f"{username}@trustguard.org",
+        "password": "Password123!",
+        "role": role,
+    }
+    await client.post("/api/v1/auth/register", json=reg_payload)
+    login_res = await client.post("/api/v1/auth/login", json={"username": username, "password": "Password123!"})
+    data = login_res.json()
+    token = data["access_token"]
+    user_id = data["user_id"]
+    return {"headers": {"Authorization": f"Bearer {token}"}, "user_id": user_id, "token": token}

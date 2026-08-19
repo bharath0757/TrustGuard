@@ -10,8 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.db.models import UploadedPaper
 from app.services.audit_service import AuditService
-from security.crypto.encryption import encrypt
-from security.crypto.integrity import generate_integrity_hash
+from app.crypto_wrapper.encryption import AES256GCM
+from app.crypto_wrapper.fragmentation import Fragmenter
 
 # Maximum file size: 50 MB
 MAX_FILE_SIZE = 50 * 1024 * 1024
@@ -81,14 +81,15 @@ class PaperUploadService:
 
         # 5. Encrypt with AES-256-GCM (authenticated encryption)
         master_key = PaperUploadService.derive_paper_encryption_key()
-        encrypted_payload = encrypt(
-            data=content,
+        ciphertext, nonce = AES256GCM.encrypt(
+            plaintext=content,
             key=master_key,
             associated_data=paper_name.encode("utf-8"),
         )
+        encrypted_payload = nonce + ciphertext
 
         # 6. Generate integrity checksum of the encrypted ciphertext
-        integrity_hash = generate_integrity_hash(encrypted_payload)
+        integrity_hash = Fragmenter.hash_fragment(encrypted_payload)
 
         # 7. Sharding count estimation
         fragment_count = max(3, min(10, file_size // (1024 * 1024) + 3))
