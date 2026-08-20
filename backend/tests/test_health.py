@@ -63,14 +63,42 @@ def test_database_url_conversions():
 
 
 def test_vercel_production_fail_fast_on_missing_postgres():
-    # Simulate Vercel environment
+    # Simulate Vercel environment with SQLite URL
     old_vercel = os.environ.get("VERCEL")
     try:
         os.environ["VERCEL"] = "1"
         with pytest.raises(RuntimeError, match="DATABASE_URL.*is missing or set to SQLite.*in Vercel production"):
             get_async_database_url("sqlite+aiosqlite:///./trustguard.db")
+
+        with pytest.raises(RuntimeError, match="DATABASE_URL.*is missing or set to SQLite.*in Vercel production"):
+            get_async_database_url(None)
     finally:
         if old_vercel is None:
             os.environ.pop("VERCEL", None)
         else:
             os.environ["VERCEL"] = old_vercel
+
+
+def test_production_secret_key_validation():
+    from app.core.config import Settings, DEFAULT_DEV_SECRET_KEY
+    old_vercel = os.environ.get("VERCEL")
+    old_env = os.environ.get("ENVIRONMENT")
+    try:
+        os.environ["VERCEL"] = "1"
+        os.environ["ENVIRONMENT"] = "production"
+        with pytest.raises(ValueError, match="SECRET_KEY environment variable is required in production"):
+            Settings(SECRET_KEY=DEFAULT_DEV_SECRET_KEY, DATABASE_URL="postgresql://user:pass@host/db")
+
+        # Valid custom production secret key should succeed
+        valid_settings = Settings(SECRET_KEY="super_secure_random_production_secret_key_xyz123", DATABASE_URL="postgresql://user:pass@host/db")
+        assert valid_settings.SECRET_KEY == "super_secure_random_production_secret_key_xyz123"
+    finally:
+        if old_vercel is None:
+            os.environ.pop("VERCEL", None)
+        else:
+            os.environ["VERCEL"] = old_vercel
+        if old_env is None:
+            os.environ.pop("ENVIRONMENT", None)
+        else:
+            os.environ["ENVIRONMENT"] = old_env
+
