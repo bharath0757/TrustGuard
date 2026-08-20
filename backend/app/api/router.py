@@ -1,9 +1,24 @@
 """V1 API Router Aggregator."""
 
 from fastapi import APIRouter
-from app.api.v1 import audit, auth, consensus, distribution, exams, simulation, papers, exam_lifecycle, users, student, ws, attack_simulator
+from app.api.v1 import (
+    attack_simulator,
+    audit,
+    auth,
+    consensus,
+    distribution,
+    exam_lifecycle,
+    exams,
+    health,
+    papers,
+    simulation,
+    student,
+    users,
+    ws,
+)
 
 api_router = APIRouter()
+api_router.include_router(health.router)
 api_router.include_router(auth.router)
 api_router.include_router(users.router)
 api_router.include_router(exams.router)
@@ -17,5 +32,3 @@ api_router.include_router(papers.router)
 api_router.include_router(exam_lifecycle.router)
 api_router.include_router(student.router)
 api_router.include_router(ws.router)
-
-

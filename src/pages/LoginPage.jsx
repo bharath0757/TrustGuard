@@ -10,6 +10,7 @@ export function LoginPage() {
 
   const [isRegister, setIsRegister] = useState(false);
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('STUDENT');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,11 +26,17 @@ export function LoginPage() {
 
     try {
       if (isRegister) {
-        await register({ username, password, role });
+        const userEmail = email.trim() || `${username.trim()}@trustguard.org`;
+        await register({
+          username: username.trim(),
+          email: userEmail,
+          password,
+          role,
+        });
         // After registration, login
-        await login({ username, password });
+        await login({ username: username.trim(), password });
       } else {
-        await login({ username, password });
+        await login({ username: username.trim(), password });
       }
       navigate(from, { replace: true });
     } catch (err) {
@@ -75,6 +82,20 @@ export function LoginPage() {
                 required
               />
             </div>
+
+            {isRegister && (
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="name@example.com"
+                  required
+                />
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>

@@ -11,6 +11,53 @@ export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (token) => localStorage.setItem(TOKEN_KEY, token);
 export const removeToken = () => localStorage.removeItem(TOKEN_KEY);
 
+/**
+ * Format backend error responses (strings, arrays of Pydantic validation errors, or objects)
+ * into a clear human-readable error message.
+ */
+function extractErrorMessage(errorData, response) {
+  if (!errorData) {
+    return `HTTP ${response.status}: ${response.statusText || 'API request failed'}`;
+  }
+
+  // Case 1: detail is a simple string
+  if (typeof errorData.detail === 'string') {
+    return errorData.detail;
+  }
+
+  // Case 2: detail is a FastAPI / Pydantic validation error array
+  if (Array.isArray(errorData.detail)) {
+    const messages = errorData.detail.map((err) => {
+      if (typeof err === 'string') return err;
+      if (err && typeof err === 'object') {
+        const field = Array.isArray(err.loc)
+          ? err.loc.filter((locPart) => locPart !== 'body' && locPart !== 'query').join('.')
+          : '';
+        const msg = err.msg || JSON.stringify(err);
+        return field ? `${field}: ${msg}` : msg;
+      }
+      return String(err);
+    });
+    return messages.filter(Boolean).join('; ') || 'Validation error';
+  }
+
+  // Case 3: detail is an object
+  if (errorData.detail && typeof errorData.detail === 'object') {
+    return JSON.stringify(errorData.detail);
+  }
+
+  // Case 4: generic message or error property
+  if (errorData.message) {
+    return errorData.message;
+  }
+
+  if (errorData.error) {
+    return errorData.error;
+  }
+
+  return `HTTP ${response.status}: ${response.statusText || 'API request failed'}`;
+}
+
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = {
@@ -31,9 +78,15 @@ async function request(endpoint, options = {}) {
   try {
     const response = await fetch(url, config);
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: response.statusText }));
-      const error = new Error(errorData.detail || 'API request failed');
+      const errorData = await response.json().catch(async () => {
+        const text = await response.text().catch(() => '');
+        return { detail: text || response.statusText };
+      });
+
+      const message = extractErrorMessage(errorData, response);
+      const error = new Error(message);
       error.status = response.status;
+      error.statusText = response.statusText;
       error.data = errorData;
       throw error;
     }
@@ -44,7 +97,7 @@ async function request(endpoint, options = {}) {
     }
     return await response.text();
   } catch (err) {
-    console.warn(`[API Client Error] ${endpoint}:`, err.message);
+    console.warn(`[API Client Error] ${endpoint} (status ${err.status || 'network'}):`, err.message);
     throw err;
   }
 }
@@ -54,6 +107,9 @@ export const api = {
   register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
   getMe: () => request('/auth/me'),
+
+  // Health
+  getHealth: () => request('/health'),
 
   // Exams
   getExams: () => request('/exams/'),

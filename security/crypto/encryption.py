@@ -1,5 +1,5 @@
 """
-TrustGuard ΓÇö Authenticated Encryption Service.
+TrustGuard — Authenticated Encryption Service.
 
 Implements AES-256-GCM using the `cryptography` library.
 Provides confidentiality and integrity for exam paper fragments.
@@ -11,6 +11,7 @@ Key properties:
 - Guarantees decryption failure if ciphertext, key, or authentication tag is modified.
 """
 import os
+from typing import Optional
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -32,13 +33,20 @@ class DecryptionFailedError(Exception):
     pass
 
 
-def encrypt_data(plaintext: bytes, key: bytes) -> bytes:
+def encrypt_data(
+    plaintext: Optional[bytes] = None,
+    key: Optional[bytes] = None,
+    associated_data: Optional[bytes] = None,
+    *,
+    data: Optional[bytes] = None,
+) -> bytes:
     """
     Encrypt and authenticate data using AES-256-GCM.
 
     Args:
-        plaintext: The raw bytes to encrypt.
+        plaintext / data: The raw bytes to encrypt.
         key: A 32-byte encryption key.
+        associated_data: Optional authenticated data.
 
     Returns:
         bytes: A payload containing the 12-byte nonce followed by the
@@ -47,35 +55,40 @@ def encrypt_data(plaintext: bytes, key: bytes) -> bytes:
     Raises:
         ValueError: If inputs are not bytes or the key length is incorrect.
     """
-    if not isinstance(plaintext, bytes):
+    raw = plaintext if plaintext is not None else data
+    if raw is None or not isinstance(raw, bytes):
         raise ValueError("Plaintext must be bytes")
-    if not isinstance(key, bytes):
+    if key is None or not isinstance(key, bytes):
         raise ValueError("Key must be bytes")
     if len(key) != 32:
         raise ValueError(f"AES-256 requires a 32-byte key, got {len(key)}")
 
     # 1. Generate a cryptographically secure random nonce.
-    # NEVER reuse a nonce with the same key in AES-GCM.
     nonce = os.urandom(NONCE_SIZE)
 
     # 2. Initialize the cipher and encrypt.
-    # The authentication tag (16 bytes) is automatically appended to the ciphertext
-    # by the cryptography library.
     aesgcm = AESGCM(key)
-    ciphertext_with_tag = aesgcm.encrypt(nonce, plaintext, associated_data=None)
+    ciphertext_with_tag = aesgcm.encrypt(nonce, raw, associated_data=associated_data)
 
     # 3. Prepend the nonce to the payload so it can be retrieved for decryption.
-    # The nonce is public and does not need to be kept secret, only unique.
     return nonce + ciphertext_with_tag
 
 
-def decrypt_data(encrypted_payload: bytes, key: bytes) -> bytes:
+def decrypt_data(
+    encrypted_payload: Optional[bytes] = None,
+    key: Optional[bytes] = None,
+    associated_data: Optional[bytes] = None,
+    *,
+    payload: Optional[bytes] = None,
+    data: Optional[bytes] = None,
+) -> bytes:
     """
     Authenticate and decrypt an AES-256-GCM payload.
 
     Args:
-        encrypted_payload: The data returned by `encrypt_data` (nonce + ciphertext + tag).
+        encrypted_payload / payload / data: The data returned by `encrypt_data` (nonce + ciphertext + tag).
         key: A 32-byte encryption key.
+        associated_data: Optional authenticated data.
 
     Returns:
         bytes: The original plaintext.
@@ -85,33 +98,28 @@ def decrypt_data(encrypted_payload: bytes, key: bytes) -> bytes:
                                or the key is incorrect.
         ValueError: If inputs are invalid or the payload is too short.
     """
-    if not isinstance(encrypted_payload, bytes):
+    raw = encrypted_payload if encrypted_payload is not None else (payload if payload is not None else data)
+    if raw is None or not isinstance(raw, bytes):
         raise ValueError("Encrypted payload must be bytes")
-    if not isinstance(key, bytes):
+    if key is None or not isinstance(key, bytes):
         raise ValueError("Key must be bytes")
     
     # Payload must contain at least the 12-byte nonce + 16-byte auth tag
-    if len(encrypted_payload) < NONCE_SIZE + 16:
+    if len(raw) < NONCE_SIZE + 16:
         raise ValueError("Encrypted payload is too short to be valid")
 
-    # Extract the nonce (first 12 bytes) and the actual ciphertext + tag
-    nonce = encrypted_payload[:NONCE_SIZE]
-    ciphertext_with_tag = encrypted_payload[NONCE_SIZE:]
+    nonce = raw[:NONCE_SIZE]
+    ciphertext_with_tag = raw[NONCE_SIZE:]
 
     aesgcm = AESGCM(key)
 
     try:
-        # Decrypt and verify integrity in one step
-        plaintext = aesgcm.decrypt(nonce, ciphertext_with_tag, associated_data=None)
+        plaintext = aesgcm.decrypt(nonce, ciphertext_with_tag, associated_data=associated_data)
         return plaintext
     except InvalidTag as exc:
-        # We catch InvalidTag and raise our own exception.
-        # This prevents accidental logging of sensitive tag mismatch details
-        # and presents a clean boundary to the application layer.
         raise DecryptionFailedError("Integrity check failed or incorrect key") from exc
 
 
 # Aliases for compatibility
 encrypt = encrypt_data
 decrypt = decrypt_data
-

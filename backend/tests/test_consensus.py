@@ -3,7 +3,10 @@
 from datetime import datetime, timedelta, timezone
 from httpx import AsyncClient
 import pytest
-from tests.test_exams import create_user_and_login
+try:
+    from backend.tests.helpers import create_user_and_login
+except ImportError:
+    from helpers import create_user_and_login
 
 
 @pytest.mark.asyncio
